@@ -64,7 +64,7 @@ func (obj *RegisteredCourseController) UpdateRegisteredCourses(context *gin.Cont
 
 	json.Unmarshal(req_body, &updated_courses)
 
-	err := obj.service.UpdateRegisteredCourses(models.RegisteredCourse{Student_Email_id: student_email_id, Registered_courses_crns: updated_courses["registered_course_crns"]})
+	err := obj.service.UpdateRegisteredCourses(models.RegisteredCourse{Student_Email_id: student_email_id, Registered_course_crns: updated_courses["registered_course_crns"]})
 
 	if err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, err)

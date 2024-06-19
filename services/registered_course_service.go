@@ -45,7 +45,7 @@ func (obj *RegisteredCourseService) RegisterCourses(register_course models.Regis
 func (obj *RegisteredCourseService) UpdateRegisteredCourses(register_course models.RegisteredCourse) error {
 	filter := bson.D{bson.E{Key: "student_email_id", Value: register_course.Student_Email_id}}
 
-	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "registered_courses_crns", Value: register_course.Registered_courses_crns}}}}
+	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "registered_course_crns", Value: register_course.Registered_course_crns}}}}
 
 	_, err := obj.collection.UpdateOne(obj.context, filter, update)
 
