@@ -33,16 +33,23 @@ func main() {
 
 	mongo_database.SetDatabase(os.Getenv("DATABASE"))
 
-	offered_service := new(services.OfferedCourseService)
-	offered_service.Init(*mongo_database)
+	offered_course_service := new(services.OfferedCourseService)
+	offered_course_service.Init(*mongo_database)
 
-	offered_controller := new(controllers.OfferedCourseController)
-	offered_controller.Init(*offered_service)
+	offered_course_controller := new(controllers.OfferedCourseController)
+	offered_course_controller.Init(*offered_course_service)
+
+	registered_course_service := new(services.RegisteredCourseService)
+	registered_course_service.Init(*mongo_database)
+
+	registered_course_controller := new(controllers.RegisteredCourseController)
+	registered_course_controller.Init(*registered_course_service)
 
 	server := gin.Default()
 
 	base_path := server.Group("")
-	offered_controller.RegisterRoutes(base_path)
+	offered_course_controller.RegisterRoutes(base_path)
+	registered_course_controller.RegisterRoutes(base_path)
 
 	server.Run(":" + os.Getenv("PORT"))
 }
