@@ -31,6 +31,10 @@ func (obj *RegisteredCourseService) GetRegisteredCourse(student_email_id string)
 }
 
 func (obj *RegisteredCourseService) RegisterCourses(register_course models.RegisteredCourse) error {
+	if register_course.Student_Email_id == "" || register_course.Registered_course_crns == nil {
+		return errors.New("invalid data")
+	}
+
 	record, _ := obj.GetRegisteredCourse(register_course.Student_Email_id)
 
 	if record != nil {
@@ -43,11 +47,20 @@ func (obj *RegisteredCourseService) RegisterCourses(register_course models.Regis
 }
 
 func (obj *RegisteredCourseService) UpdateRegisteredCourses(register_course models.RegisteredCourse) error {
+
+	if register_course.Registered_course_crns == nil {
+		return errors.New("invalid data")
+	}
+
 	filter := bson.D{bson.E{Key: "student_email_id", Value: register_course.Student_Email_id}}
 
 	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "registered_course_crns", Value: register_course.Registered_course_crns}}}}
 
-	_, err := obj.collection.UpdateOne(obj.context, filter, update)
+	result, err := obj.collection.UpdateOne(obj.context, filter, update)
+
+	if result.MatchedCount == 0 {
+		return errors.New("record not found")
+	}
 
 	return err
 }
@@ -56,7 +69,11 @@ func (obj *RegisteredCourseService) DeleteRegisteredCourses(student_email_id str
 
 	filter := bson.D{bson.E{Key: "student_email_id", Value: student_email_id}}
 
-	_, err := obj.collection.DeleteOne(obj.context, filter)
+	result, err := obj.collection.DeleteOne(obj.context, filter)
+
+	if result.DeletedCount == 0 {
+		return errors.New("record not found")
+	}
 
 	return err
 }

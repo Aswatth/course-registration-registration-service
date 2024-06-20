@@ -22,26 +22,26 @@ func (obj *RegisteredCourseController) RegisterCourses(context *gin.Context) {
 	var register_course models.RegisteredCourse
 
 	if err := context.ShouldBindJSON(&register_course); err != nil {
-		context.AbortWithError(http.StatusBadRequest, err)
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"response": err.Error()})
+	} else {
+		err := obj.service.RegisterCourses(register_course)
+
+		if err != nil {
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"response": err.Error()})
+		} else {
+			context.Status(http.StatusOK)
+		}
 	}
-
-	err := obj.service.RegisterCourses(register_course)
-
-	if err != nil {
-		context.AbortWithError(http.StatusBadRequest, err)
-	}
-
-	context.Status(http.StatusOK)
 }
 func (obj *RegisteredCourseController) GetRegisteredCourses(context *gin.Context) {
 	student_email_id := context.Param("student_email_id")
 	result, err := obj.service.GetRegisteredCourse(student_email_id)
 
 	if err != nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, err)
+		context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
+	} else {
+		context.JSON(http.StatusOK, result)
 	}
-
-	context.JSON(http.StatusOK, result)
 }
 func (obj *RegisteredCourseController) DeleteRegisteredCourses(context *gin.Context) {
 	student_email_id := context.Param("student_email_id")
@@ -49,28 +49,36 @@ func (obj *RegisteredCourseController) DeleteRegisteredCourses(context *gin.Cont
 	err := obj.service.DeleteRegisteredCourses(student_email_id)
 
 	if err != nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, err)
+		context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
+	} else {
+		context.Status(http.StatusOK)
 	}
-
-	context.Status(http.StatusOK)
 }
 
 func (obj *RegisteredCourseController) UpdateRegisteredCourses(context *gin.Context) {
 	student_email_id := context.Param("student_email_id")
 
-	req_body, _ := io.ReadAll(context.Request.Body)
-
-	updated_courses := make(map[string][]int)
-
-	json.Unmarshal(req_body, &updated_courses)
-
-	err := obj.service.UpdateRegisteredCourses(models.RegisteredCourse{Student_Email_id: student_email_id, Registered_course_crns: updated_courses["registered_course_crns"]})
+	req_body, err := io.ReadAll(context.Request.Body)
 
 	if err != nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, err)
-	}
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"response": err.Error()})
+	} else {
+		updated_courses := make(map[string][]int)
 
-	context.Status(http.StatusOK)
+		err := json.Unmarshal(req_body, &updated_courses)
+
+		if err != nil {
+			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
+		} else {
+			err := obj.service.UpdateRegisteredCourses(models.RegisteredCourse{Student_Email_id: student_email_id, Registered_course_crns: updated_courses["registered_course_crns"]})
+
+			if err != nil {
+				context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"response": err.Error()})
+			} else {
+				context.Status(http.StatusOK)
+			}
+		}
+	}
 }
 
 func (obj *RegisteredCourseController) RegisterRoutes(rg *gin.RouterGroup) {
