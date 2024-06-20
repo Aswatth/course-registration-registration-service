@@ -4,7 +4,6 @@ import (
 	"context"
 	"course-registration-system/registration-service/models"
 	"errors"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -32,9 +31,11 @@ func (obj *OfferedCourseService) GetOfferedCourse(crn int) (*models.OfferedCours
 }
 
 func (obj *OfferedCourseService) CreateOfferedCourse(offered_course models.OfferedCourse) error {
-	record, _ := obj.GetOfferedCourse(offered_course.CRN)
+	if offered_course.CRN == 0 || offered_course.Course_id == 0 || offered_course.OfferedBy == "" || offered_course.Days == nil || offered_course.Timings == nil {
+		return errors.New("invalid data")
+	}
 
-	fmt.Println(record)
+	record, _ := obj.GetOfferedCourse(offered_course.CRN)
 
 	if record != nil {
 		return errors.New(string(rune(offered_course.CRN)) + " already exists")
@@ -46,11 +47,19 @@ func (obj *OfferedCourseService) CreateOfferedCourse(offered_course models.Offer
 }
 
 func (obj *OfferedCourseService) UpdateOfferedCourse(offered_course models.OfferedCourse) error {
+	if offered_course.Days == nil || offered_course.Timings == nil {
+		return errors.New("invalid data")
+	}
+
 	filter := bson.D{bson.E{Key: "crn", Value: offered_course.CRN}}
 
 	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "days", Value: offered_course.Days}, bson.E{Key: "timings", Value: offered_course.Timings}}}}
 
-	_, err := obj.collection.UpdateOne(obj.context, filter, update)
+	result, err := obj.collection.UpdateOne(obj.context, filter, update)
+
+	if result.MatchedCount == 0 {
+		return errors.New("record not found")
+	}
 
 	return err
 }
@@ -58,7 +67,11 @@ func (obj *OfferedCourseService) UpdateOfferedCourse(offered_course models.Offer
 func (obj *OfferedCourseService) DeleteOfferedCourse(crn int) error {
 	filter := bson.D{bson.E{Key: "crn", Value: crn}}
 
-	_, err := obj.collection.DeleteOne(obj.context, filter)
+	result, err := obj.collection.DeleteOne(obj.context, filter)
+
+	if result.DeletedCount == 0 {
+		return errors.New("record not found")
+	}
 
 	return err
 }

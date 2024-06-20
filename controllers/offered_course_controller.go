@@ -18,15 +18,19 @@ func (obj *OfferedCourseController) Init(service services.OfferedCourseService) 
 }
 
 func (obj *OfferedCourseController) GetOfferedCourse(context *gin.Context) {
-	crn, _ := strconv.Atoi(context.Param("crn"))
-
-	result, err := obj.service.GetOfferedCourse(crn)
+	crn, err := strconv.Atoi(context.Param("crn"))
 
 	if err != nil {
-		context.AbortWithError(http.StatusBadRequest, err)
-	}
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"response": err.Error()})
+	} else {
+		result, err := obj.service.GetOfferedCourse(crn)
 
-	context.JSON(http.StatusOK, result)
+		if err != nil {
+			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
+		} else {
+			context.JSON(http.StatusOK, result)
+		}
+	}
 }
 
 func (obj *OfferedCourseController) AddOfferedCourse(context *gin.Context) {
@@ -34,46 +38,58 @@ func (obj *OfferedCourseController) AddOfferedCourse(context *gin.Context) {
 
 	//Check if given JSON is valid
 	if err := context.ShouldBindJSON(&offered_course); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	} else {
+		err := obj.service.CreateOfferedCourse(offered_course)
+
+		if err != nil {
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		} else {
+			context.Status(http.StatusOK)
+		}
 	}
 
-	err := obj.service.CreateOfferedCourse(offered_course)
-
-	if err != nil {
-		context.AbortWithError(http.StatusBadRequest, err)
-	}
 }
 
 func (obj *OfferedCourseController) RemoveOfferedCourse(context *gin.Context) {
-	crn, _ := strconv.Atoi(context.Param("crn"))
-
-	err := obj.service.DeleteOfferedCourse(crn)
+	crn, err := strconv.Atoi(context.Param("crn"))
 
 	if err != nil {
-		context.AbortWithError(http.StatusBadRequest, err)
-	}
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	} else {
+		err := obj.service.DeleteOfferedCourse(crn)
 
-	context.JSON(http.StatusOK, nil)
+		if err != nil {
+			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		} else {
+			context.Status(http.StatusOK)
+		}
+	}
 }
 
 func (obj *OfferedCourseController) UpdateOffereddCourse(context *gin.Context) {
-	crn, _ := strconv.Atoi(context.Param("crn"))
-
-	var offered_course models.OfferedCourse
-
-	//Check if given JSON is valid
-	if err := context.ShouldBindJSON(&offered_course); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-	}
-	offered_course.CRN = crn
-
-	err := obj.service.UpdateOfferedCourse(offered_course)
+	crn, err := strconv.Atoi(context.Param("crn"))
 
 	if err != nil {
-		context.AbortWithError(http.StatusBadRequest, err)
-	}
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	} else {
+		var offered_course models.OfferedCourse
 
-	context.JSON(http.StatusOK, nil)
+		//Check if given JSON is valid
+		if err := context.ShouldBindJSON(&offered_course); err != nil {
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		} else {
+			offered_course.CRN = crn
+
+			err := obj.service.UpdateOfferedCourse(offered_course)
+
+			if err != nil {
+				context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			}
+
+			context.Status(http.StatusOK)
+		}
+	}
 }
 
 func (obj *OfferedCourseController) RegisterRoutes(rg *gin.RouterGroup) {
