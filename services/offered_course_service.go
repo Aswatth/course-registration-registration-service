@@ -4,6 +4,7 @@ import (
 	"context"
 	"course-registration-system/registration-service/models"
 	"errors"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,7 +26,13 @@ func (obj *OfferedCourseService) GetOfferedCourse(crn int) (*models.OfferedCours
 
 	query := bson.D{bson.E{Key: "crn", Value: crn}}
 
-	err := obj.collection.FindOne(obj.context, query).Decode(&offered_course)
+	result := obj.collection.FindOne(obj.context, query)
+
+	if result.Err() != nil {
+		return nil, errors.New("record not found")
+	}
+
+	err := result.Decode(&offered_course)
 
 	return offered_course, err
 }
@@ -38,7 +45,7 @@ func (obj *OfferedCourseService) CreateOfferedCourse(offered_course models.Offer
 	record, _ := obj.GetOfferedCourse(offered_course.CRN)
 
 	if record != nil {
-		return errors.New(string(rune(offered_course.CRN)) + " already exists")
+		return errors.New(fmt.Sprint(offered_course.CRN) + " already exists")
 	}
 
 	_, err := obj.collection.InsertOne(obj.context, offered_course)

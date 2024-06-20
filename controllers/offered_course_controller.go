@@ -27,7 +27,7 @@ func (obj *OfferedCourseController) GetOfferedCourse(context *gin.Context) {
 
 		if err != nil {
 			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
-		} else {
+		} else if result != nil {
 			context.JSON(http.StatusOK, result)
 		}
 	}
