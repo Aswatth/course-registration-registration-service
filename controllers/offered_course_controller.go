@@ -20,8 +20,10 @@ func (obj *OfferedCourseController) Init(service services.OfferedCourseService) 
 func (obj *OfferedCourseController) GetOfferedCourse(context *gin.Context) {
 	if(context.Query("email_id") != "") {
 		obj.getOfferedCourseByProfessor(context)
+		return
 	} else if(context.Query("CRN") != "" ) {
 		obj.getOfferedCourseByCRN(context)
+		return
 	}
 
 	result, err := obj.service.GetAllOfferedCourses()
