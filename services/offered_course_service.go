@@ -21,15 +21,15 @@ func (obj *OfferedCourseService) Init(database MongoDatabase) {
 	obj.context, obj.collection = obj.database.GetCollection("offered_courses")
 }
 
-func (obj *OfferedCourseService) GetOfferedCourse(crn int) (*models.OfferedCourse, error) {
+func (obj *OfferedCourseService) GetOfferedCourseByCRN(crn int) (*models.OfferedCourse, error) {
 	var offered_course *models.OfferedCourse
-
+	
 	query := bson.D{bson.E{Key: "crn", Value: crn}}
 
 	result := obj.collection.FindOne(obj.context, query)
-
+	
 	if result.Err() != nil {
-		return nil, errors.New("record not found")
+		return nil, result.Err()
 	}
 
 	err := result.Decode(&offered_course)
@@ -37,12 +37,29 @@ func (obj *OfferedCourseService) GetOfferedCourse(crn int) (*models.OfferedCours
 	return offered_course, err
 }
 
+func (obj *OfferedCourseService) GetAllOfferedCourseByProfessor(email_id string) ([]models.OfferedCourse, error) {
+	var offered_course []models.OfferedCourse
+
+	query := bson.D{bson.E{Key: "offered_by", Value: email_id}}
+
+	result, _ := obj.collection.Find(obj.context, query)
+	
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	err := result.All(obj.context, &offered_course)
+
+	return offered_course, err
+}
+
+
 func (obj *OfferedCourseService) CreateOfferedCourse(offered_course models.OfferedCourse) error {
 	if offered_course.CRN == 0 || offered_course.Course_id == 0 || offered_course.OfferedBy == "" || offered_course.Days == nil || offered_course.Timings == nil {
 		return errors.New("invalid data")
 	}
 
-	record, _ := obj.GetOfferedCourse(offered_course.CRN)
+	record, _ := obj.GetOfferedCourseByCRN(offered_course.CRN)
 
 	if record != nil {
 		return errors.New(fmt.Sprint(offered_course.CRN) + " already exists")
