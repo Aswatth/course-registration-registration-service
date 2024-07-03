@@ -21,6 +21,20 @@ func (obj *OfferedCourseService) Init(database MongoDatabase) {
 	obj.context, obj.collection = obj.database.GetCollection("offered_courses")
 }
 
+func (obj *OfferedCourseService) GetAllOfferedCourses() ([]models.OfferedCourse, error) {
+	var offered_course_list []models.OfferedCourse
+
+	result, _ := obj.collection.Find(obj.context, bson.D{})
+	
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	err := result.All(obj.context, &offered_course_list)
+
+	return offered_course_list, err
+}
+
 func (obj *OfferedCourseService) GetOfferedCourseByCRN(crn int) (*models.OfferedCourse, error) {
 	var offered_course *models.OfferedCourse
 	
@@ -38,7 +52,7 @@ func (obj *OfferedCourseService) GetOfferedCourseByCRN(crn int) (*models.Offered
 }
 
 func (obj *OfferedCourseService) GetAllOfferedCourseByProfessor(email_id string) ([]models.OfferedCourse, error) {
-	var offered_course []models.OfferedCourse
+	var offered_course_list []models.OfferedCourse
 
 	query := bson.D{bson.E{Key: "offered_by", Value: email_id}}
 
@@ -48,9 +62,9 @@ func (obj *OfferedCourseService) GetAllOfferedCourseByProfessor(email_id string)
 		return nil, result.Err()
 	}
 
-	err := result.All(obj.context, &offered_course)
+	err := result.All(obj.context, &offered_course_list)
 
-	return offered_course, err
+	return offered_course_list, err
 }
 
 

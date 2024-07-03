@@ -23,6 +23,14 @@ func (obj *OfferedCourseController) GetOfferedCourse(context *gin.Context) {
 	} else if(context.Query("CRN") != "" ) {
 		obj.getOfferedCourseByCRN(context)
 	}
+
+	result, err := obj.service.GetAllOfferedCourses()
+
+		if err != nil {
+			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
+		} else if result != nil {
+			context.JSON(http.StatusOK, result)
+		}
 }
 
 func (obj *OfferedCourseController) getOfferedCourseByCRN(context *gin.Context) {
