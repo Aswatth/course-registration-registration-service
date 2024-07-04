@@ -69,7 +69,7 @@ func (obj *OfferedCourseService) GetAllOfferedCourseByProfessor(email_id string)
 
 
 func (obj *OfferedCourseService) CreateOfferedCourse(offered_course models.OfferedCourse) error {
-	if offered_course.CRN == 0 || offered_course.Course_id == 0 || offered_course.OfferedBy == "" || offered_course.Days == nil || offered_course.Timings == nil {
+	if offered_course.CRN == 0 || offered_course.Course_id == 0 || offered_course.OfferedBy == "" || offered_course.DayTime == nil {
 		return errors.New("invalid data")
 	}
 
@@ -85,13 +85,13 @@ func (obj *OfferedCourseService) CreateOfferedCourse(offered_course models.Offer
 }
 
 func (obj *OfferedCourseService) UpdateOfferedCourse(offered_course models.OfferedCourse) error {
-	if offered_course.Days == nil || offered_course.Timings == nil {
+	if offered_course.DayTime == nil {
 		return errors.New("invalid data")
 	}
 
 	filter := bson.D{bson.E{Key: "crn", Value: offered_course.CRN}}
 
-	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "days", Value: offered_course.Days}, bson.E{Key: "timings", Value: offered_course.Timings}}}}
+	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "day_time", Value: offered_course.DayTime}}}}
 
 	result, err := obj.collection.UpdateOne(obj.context, filter, update)
 
