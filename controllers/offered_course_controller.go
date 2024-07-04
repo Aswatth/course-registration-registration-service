@@ -67,12 +67,12 @@ func (obj *OfferedCourseController) AddOfferedCourse(context *gin.Context) {
 
 	//Check if given JSON is valid
 	if err := context.ShouldBindJSON(&offered_course); err != nil {
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"response": err.Error()})
 	} else {
 		err := obj.service.CreateOfferedCourse(offered_course)
 
 		if err != nil {
-			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"response": err.Error()})
 		} else {
 			context.Status(http.StatusOK)
 		}
@@ -84,12 +84,12 @@ func (obj *OfferedCourseController) RemoveOfferedCourse(context *gin.Context) {
 	crn, err := strconv.Atoi(context.Param("crn"))
 
 	if err != nil {
-		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"response": err.Error()})
 	} else {
 		err := obj.service.DeleteOfferedCourse(crn)
 
 		if err != nil {
-			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
 		} else {
 			context.Status(http.StatusOK)
 		}
@@ -100,20 +100,20 @@ func (obj *OfferedCourseController) UpdateOffereddCourse(context *gin.Context) {
 	crn, err := strconv.Atoi(context.Param("crn"))
 
 	if err != nil {
-		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"response": err.Error()})
 	} else {
 		var offered_course models.OfferedCourse
 
 		//Check if given JSON is valid
 		if err := context.ShouldBindJSON(&offered_course); err != nil {
-			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"response": err.Error()})
 		} else {
 			offered_course.CRN = crn
 
 			err := obj.service.UpdateOfferedCourse(offered_course)
 
 			if err != nil {
-				context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+				context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"response": err.Error()})
 			}
 
 			context.Status(http.StatusOK)
