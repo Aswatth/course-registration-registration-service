@@ -21,7 +21,7 @@ func (obj *OfferedCourseController) GetOfferedCourse(context *gin.Context) {
 	if(context.Query("email_id") != "") {
 		obj.getOfferedCourseByProfessor(context)
 		return
-	} else if(context.Query("CRN") != "" ) {
+	} else if(context.Query("crn") != "" ) {
 		obj.getOfferedCourseByCRN(context)
 		return
 	}
@@ -36,7 +36,7 @@ func (obj *OfferedCourseController) GetOfferedCourse(context *gin.Context) {
 }
 
 func (obj *OfferedCourseController) getOfferedCourseByCRN(context *gin.Context) {
-	crn, err := strconv.Atoi(context.Query("CRN"))
+	crn, err := strconv.Atoi(context.Query("crn"))
 
 	if err != nil {
 		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"response": err.Error()})
