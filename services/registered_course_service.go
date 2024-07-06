@@ -38,11 +38,12 @@ func (obj *RegisteredCourseService) RegisterCourses(register_course models.Regis
 	record, _ := obj.GetRegisteredCourse(register_course.Student_Email_id)
 
 	if record != nil {
-		return errors.New(register_course.Student_Email_id + " already exists")
+		obj.UpdateRegisteredCourses(register_course)
+		// return errors.New(register_course.Student_Email_id + " already exists")
 	}
 
 	_, err := obj.collection.InsertOne(obj.context, register_course)
-
+	
 	return err
 }
 
