@@ -67,6 +67,22 @@ func (obj *OfferedCourseService) GetAllOfferedCourseByProfessor(email_id string)
 	return offered_course_list, err
 }
 
+func (obj *OfferedCourseService) GetAllOfferedCourseByCourseId(course_id int) ([]models.OfferedCourse, error) {
+	var offered_course_list []models.OfferedCourse
+
+	query := bson.D{bson.E{Key: "course_id", Value: course_id}}
+
+	result, _ := obj.collection.Find(obj.context, query)
+	
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	err := result.All(obj.context, &offered_course_list)
+
+	return offered_course_list, err
+}
+
 
 func (obj *OfferedCourseService) CreateOfferedCourse(offered_course models.OfferedCourse) error {
 	if offered_course.CRN == 0 || offered_course.Course_id == 0 || offered_course.OfferedBy == "" || offered_course.DayTime == nil {

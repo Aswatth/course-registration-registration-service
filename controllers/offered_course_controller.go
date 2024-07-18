@@ -24,6 +24,9 @@ func (obj *OfferedCourseController) GetOfferedCourse(context *gin.Context) {
 	} else if(context.Query("crn") != "" ) {
 		obj.getOfferedCourseByCRN(context)
 		return
+	} else if(context.Query("course_id") !=  "") {
+		obj.getOfferedCourseByCourseId(context)
+		return
 	}
 
 	result, err := obj.service.GetAllOfferedCourses()
@@ -55,11 +58,26 @@ func (obj *OfferedCourseController) getOfferedCourseByProfessor(context *gin.Con
 	
 	result, err := obj.service.GetAllOfferedCourseByProfessor(context.Query("email_id"))
 
+	if err != nil {
+		context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
+	} else if result != nil {
+		context.JSON(http.StatusOK, result)
+	}
+}
+func(obj *OfferedCourseController) getOfferedCourseByCourseId(context *gin.Context) {
+	course_id, err := strconv.Atoi(context.Query("course_id"))
+
+	if err != nil {
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"response": err.Error()})
+	} else {
+		result, err := obj.service.GetAllOfferedCourseByCourseId(course_id)
+
 		if err != nil {
 			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
 		} else if result != nil {
 			context.JSON(http.StatusOK, result)
 		}
+	}
 }
 
 func (obj *OfferedCourseController) AddOfferedCourse(context *gin.Context) {
