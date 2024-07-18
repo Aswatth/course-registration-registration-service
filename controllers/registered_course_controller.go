@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,9 +34,26 @@ func (obj *RegisteredCourseController) RegisterCourses(context *gin.Context) {
 		}
 	}
 }
-func (obj *RegisteredCourseController) GetRegisteredCourses(context *gin.Context) {
+func (obj *RegisteredCourseController) getRegisteredCoursesByCRN(context *gin.Context) {
+	
+	crn, err := strconv.Atoi(context.Query("crn"))
+
+	if (err != nil) {
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"response": err.Error()})
+	} else {
+		result, err := obj.service.GetRegisteredCourseByCRN(crn)
+
+		if err != nil {
+			context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
+		} else {
+			context.JSON(http.StatusOK, result)
+		}
+	}	
+}
+
+func (obj *RegisteredCourseController) getRegisteredCoursesByEmailId(context *gin.Context) {
 	student_email_id := context.Query("email_id")
-	result, err := obj.service.GetRegisteredCourse(student_email_id)
+	result, err := obj.service.GetRegisteredCourseByEmailId(student_email_id)
 
 	if err != nil {
 		context.AbortWithStatusJSON(http.StatusNotFound, gin.H{"response": err.Error()})
@@ -43,6 +61,17 @@ func (obj *RegisteredCourseController) GetRegisteredCourses(context *gin.Context
 		context.JSON(http.StatusOK, result)
 	}
 }
+
+func (obj *RegisteredCourseController) GetRegisteredCourses(context *gin.Context) {
+	if(context.Query("email_id") != "" ){
+		obj.getRegisteredCoursesByEmailId(context)
+		return
+	} else if(context.Query("crn") != "") {
+		obj.getRegisteredCoursesByCRN(context)
+		return
+	}
+}
+
 func (obj *RegisteredCourseController) DeleteRegisteredCourses(context *gin.Context) {
 	student_email_id := context.Query("email_id")
 

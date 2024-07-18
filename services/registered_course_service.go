@@ -21,7 +21,24 @@ func (obj *RegisteredCourseService) Init(database MongoDatabase) {
 	obj.context, obj.collection = obj.database.GetCollection("registered_courses")
 }
 
-func (obj *RegisteredCourseService) GetRegisteredCourse(student_email_id string) (*models.RegisteredCourse, error) {
+func (obj *RegisteredCourseService) GetRegisteredCourseByCRN(crn int) ([]models.RegisteredCourse, error) {
+	filter := bson.D{bson.E{ Key: "registered_course_crns", Value: crn}}
+
+	var registered_course_list []models.RegisteredCourse
+	result, err := obj.collection.Find(obj.context, filter)
+
+	if (err != nil) {
+		return nil, err
+	} else if (result.Err() != nil){
+		return nil, result.Err()
+	} else {
+		result.All(obj.context, &registered_course_list)
+
+		return registered_course_list, nil
+	}
+}
+
+func (obj *RegisteredCourseService) GetRegisteredCourseByEmailId(student_email_id string) (*models.RegisteredCourse, error) {
 	filter := bson.D{bson.E{Key: "student_email_id", Value: student_email_id}}
 
 	var registered_course *models.RegisteredCourse
@@ -35,7 +52,7 @@ func (obj *RegisteredCourseService) RegisterCourses(register_course models.Regis
 		return errors.New("invalid data")
 	}
 
-	record, _ := obj.GetRegisteredCourse(register_course.Student_Email_id)
+	record, _ := obj.GetRegisteredCourseByEmailId(register_course.Student_Email_id)
 
 	if record != nil {
 		obj.UpdateRegisteredCourses(register_course)
