@@ -73,7 +73,7 @@ func (obj *RegisteredCourseController) GetRegisteredCourses(context *gin.Context
 }
 
 func (obj *RegisteredCourseController) DeleteRegisteredCourses(context *gin.Context) {
-	student_email_id := context.Query("email_id")
+	student_email_id := context.Param("email_id")
 
 	err := obj.service.DeleteRegisteredCourses(student_email_id)
 
@@ -85,7 +85,7 @@ func (obj *RegisteredCourseController) DeleteRegisteredCourses(context *gin.Cont
 }
 
 func (obj *RegisteredCourseController) UpdateRegisteredCourses(context *gin.Context) {
-	student_email_id := context.Query("email_id")
+	student_email_id := context.Param("email_id")
 
 	req_body, err := io.ReadAll(context.Request.Body)
 
@@ -115,6 +115,6 @@ func (obj *RegisteredCourseController) RegisterRoutes(rg *gin.RouterGroup) {
 
 	offered_course_routes.POST("", obj.RegisterCourses)
 	offered_course_routes.GET("", obj.GetRegisteredCourses)
-	offered_course_routes.DELETE("", obj.DeleteRegisteredCourses)
-	offered_course_routes.PUT("", obj.UpdateRegisteredCourses)
+	offered_course_routes.DELETE("/:email_id", obj.DeleteRegisteredCourses)
+	offered_course_routes.PUT("/:email_id", obj.UpdateRegisteredCourses)
 }
