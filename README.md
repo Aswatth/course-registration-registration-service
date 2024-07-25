@@ -32,6 +32,36 @@ In case of any error encoutered, {response: "error message"} would be returned a
   <tr>
     <td>DELETE</td>
     <td>/offered_course/:crn</td>
-    <td>Delete an offered course using the given CRN course</td>
+    <td>Delete an offered course using the given CRN</td>
+  </tr>
+</table>
+
+<h3>Registered course</h3>
+<hr>
+<table>
+  <tr>
+    <th>Action</th>
+    <th>URL</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/register_course</td>
+    <td>Registers for a offered course <br> Fields: <br> <i>student_email_id<br>registered_course_crns</i></td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/register_course <br> /register_course?email_id=? <br> /register_course?crn=?</td>
+    <td>Fetches all registered courses or based on registered_student_email_id or registered_course CRN respectively</td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>/register_course?crn=?</td>
+    <td>Update registered course using the given CRN <br>Fields:<br><i>registered_course_crns</i></td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/register_course?crn=?</td>
+    <td>Delete a registered course using the given CRN</td>
   </tr>
 </table>
